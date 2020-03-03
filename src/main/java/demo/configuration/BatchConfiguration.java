@@ -50,6 +50,8 @@ public class BatchConfiguration {
 	
 	
 
+	
+	
 	@Bean
 	public Step step1() {
 		return steps.get("databaseToDatabaseStep")
