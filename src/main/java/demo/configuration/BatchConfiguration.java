@@ -47,6 +47,8 @@ public class BatchConfiguration {
 				.start(step1())
 				.build();
 	}
+	
+	
 
 	@Bean
 	public Step step1() {
