@@ -1,9 +1,23 @@
 package demo.model;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name="MOCK_DATA_PERSON1")
 public class Person {
-	private String lastName;
+	
+	
+	@Column(name="first_name")
 	private String firstName;
+	@Column(name="last_name")
+	private String lastName;
+	@Column(name="processed")
 	private Integer processed;
+	@Id
+	private Long id;
 
 	public void setFirstName(String firstName) {
 		this.firstName = firstName;
@@ -32,6 +46,14 @@ public class Person {
 
 	public void setProcessed(Integer processed) {
 		this.processed = processed;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	
