@@ -27,46 +27,41 @@ import demo.processor.PersonItemProcessor;
 @Configuration
 @EnableBatchProcessing
 public class BatchConfiguration {
-	
+
 	@Autowired
 	private JobRegistry jobRegistry;
-	
+
 	@Autowired
 	private DataSource dataSource;
-	
+
 	@Autowired
 	private JobBuilderFactory jobs;
-	
+
 	@Autowired
 	private StepBuilderFactory steps;
 
-	
 	@Bean
 	public Job importUserJob(final Step s1) {
 		return jobs.get("importUserJob").incrementer(new RunIdIncrementer()).flow(s1).end().build();
 	}
-	
-	
 
-	
-	
 	@Bean
-	public Step step1(final ItemStreamReader<Person> reader,
-            final ItemWriter<Person> writer) {
-		return steps.get("databaseToDatabaseStep")
-				.<Person, Person> chunk(10)
-				.reader(reader)
-				.processor(processor())
-				.writer(writer)
-				.build();
+	public Step step1(final ItemStreamReader<Person> reader, final ItemWriter<Person> writer,
+			final ItemWriter<Person> writerSource) {
+		return steps.get("databaseToDatabaseStep").<Person, Person>chunk(10).reader(reader).processor(processor()).processor(processorName())
+				.writer(writer).writer(writerSource).build();
 	}
-	
-	
+
+	@Bean
+	public ItemProcessor<Person, Person> processorName() {
+		return new ValidationProcessor();
+	}
+
 	@Bean
 	public ItemStreamReader<Person> reader(@Qualifier("sourceDb") final DataSource dataSource) {
 		JdbcCursorItemReader<Person> reader = new JdbcCursorItemReader<Person>();
 		reader.setDataSource(dataSource);
-			reader.setSql("SELECT first_name, last_name FROM dbo.MOCK_DATA_PERSON");
+		reader.setSql("SELECT first_name, last_name FROM dbo.MOCK_DATA_PERSON");
 		reader.setRowMapper(new PersonRowMapper());
 		return reader;
 	}
@@ -80,9 +75,18 @@ public class BatchConfiguration {
 	public ItemWriter<Person> writer(@Qualifier("destinationDb") final DataSource dataSource) {
 		JdbcBatchItemWriter<Person> writer = new JdbcBatchItemWriter<Person>();
 		writer.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<Person>());
-		writer.setSql("INSERT INTO DBO.MOCK_DATA_EMPLOYEE1 (first_name, last_name) VALUES (:firstName, :lastName)");
+		writer.setSql("INSERT INTO DBO.MOCK_DATA_EMPLOYEE (first_name, last_name) VALUES (:firstName, :lastName)");
 		writer.setDataSource(dataSource);
 		return writer;
 	}
-	
+
+	@Bean
+	public ItemWriter<Person> writerSource(@Qualifier("sourceDb") final DataSource dataSource) {
+		JdbcBatchItemWriter<Person> writer = new JdbcBatchItemWriter<Person>();
+		writer.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<Person>());
+		writer.setSql("UPDATE DBO.MOCK_DATA_PERSON SET processed = '1' WHERE UPPER(first_name) = UPPER(:firstName)");
+		writer.setDataSource(dataSource);
+		return writer;
+	}
+
 }

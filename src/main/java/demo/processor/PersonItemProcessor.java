@@ -14,6 +14,7 @@ public class PersonItemProcessor implements ItemProcessor<Person, Person> {
         final Person transformedPerson = new Person();
         transformedPerson.setFirstName(firstName);
         transformedPerson.setLastName(lastName);
+        transformedPerson.setProcessed(1);
 
         return transformedPerson;
     }

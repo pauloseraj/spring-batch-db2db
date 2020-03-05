@@ -3,6 +3,7 @@ package demo.model;
 public class Person {
 	private String lastName;
 	private String firstName;
+	private Integer processed;
 
 	public void setFirstName(String firstName) {
 		this.firstName = firstName;
@@ -24,4 +25,14 @@ public class Person {
 	public String toString() {
 		return "firstName: " + firstName + ", lastName: " + lastName;
 	}
+
+	public Integer getProcessed() {
+		return processed;
+	}
+
+	public void setProcessed(Integer processed) {
+		this.processed = processed;
+	}
+
+	
 }
